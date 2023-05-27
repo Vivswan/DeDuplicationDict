@@ -70,6 +70,7 @@ assert DeDuplicationDict.from_json_save_dict(dedup_dict.to_json_save_dict()).to_
 | _Memory Saving_     |    **7.868x**    |   **7.235x**   |
 
 [//]: # (![dict vs DeDuplicationDict]&#40;https://github.com/Vivswan/DeDuplicationDict/raw/release/docs/_static/dict_vs_DeDuplicationDict.svg&#41;)
+
 ![dict vs DeDuplicationDict](docs/_static/dict_vs_DeDuplicationDict.svg)
 
 ## Documentation

@@ -258,6 +258,38 @@ class TestMain(unittest.TestCase):
         json_data = json.dumps(data, sort_keys=True)
         self.assertEqual(json_dd_dict, json_data)
 
+    def test_get_key_dict(self):
+        """Test the _get_key_dict method of the DeDuplicationDict class."""
+
+        data = get_json_test_data()
+        dd_dict = DeDuplicationDict(**data)
+        key_dict = dd_dict._get_key_dict()
+        to_visit = [(data, key_dict)]
+        while to_visit:
+            data, key_dict = to_visit.pop()
+            for k, v in data.items():
+                self.assertIn(k, key_dict)
+
+                if not isinstance(v, dict):
+                    continue
+
+                to_visit.append((v, key_dict[k]))
+
+    def test_set_key_dict(self):
+        """Test the _set_key_dict method of the DeDuplicationDict class."""
+
+        data = get_json_test_data()
+        dd_dict = DeDuplicationDict(**data)
+        dd_dict2 = DeDuplicationDict()
+        dd_dict2.value_dict = dd_dict.value_dict
+        dd_dict2._set_key_dict(dd_dict._get_key_dict())
+
+        json_data = json.dumps(data, sort_keys=True)
+        json_dd_dict = json.dumps(dd_dict.to_dict(), sort_keys=True)
+        json_dd_dict2 = json.dumps(dd_dict2.to_dict(), sort_keys=True)
+        self.assertEqual(json_data, json_dd_dict)
+        self.assertEqual(json_data, json_dd_dict2)
+
     def test_size_compression(self):
         """Test the size compression of the DeDuplicationDict class."""
 
