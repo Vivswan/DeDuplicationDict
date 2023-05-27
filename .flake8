@@ -1,0 +1,40 @@
+[flake8]
+max-line-length = 120
+
+extend-ignore =
+    # No explicit stacklevel argument found
+    B028,
+
+    # Coding magic comment
+    C101,
+
+    # Missing docstring in public module
+    D100,
+
+    # Missing docstring in public package
+    D104,
+
+    # No blank lines allowed after function docstring
+    D202,
+
+    # No whitespaces allowed surrounding docstring text
+    D210,
+
+    # First line should be in imperative mood
+    D401,
+
+    # unnecessary variable assignment before return statement
+    R504,
+
+    # unnecessary else after return statement
+    R505,
+
+exclude =
+    ./.git,
+    ./venv,
+    ./_data,
+    ./dist,
+    ./unit_tests,
+
+max-complexity = 10
+optional-ascii-coding = True
