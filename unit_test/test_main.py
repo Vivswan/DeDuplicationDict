@@ -3,7 +3,7 @@ import sys
 import unittest
 
 
-from autocachedict import AutoCacheDict
+from deduplicationdict import DeDuplicationDict
 
 
 def get_size(obj, seen=None):
@@ -32,22 +32,22 @@ class TestMain(unittest.TestCase):
         with open('test.json', "r") as f:
             data = json.load(f)
 
-        ac_dict = AutoCacheDict(**data)
+        ac_dict = DeDuplicationDict(**data)
         self.assertEqual(len(ac_dict), len(data))
 
     def test_value_dict_consistency(self):
         with open('test.json', "r") as f:
             data = json.load(f)
 
-        ac_dict = AutoCacheDict(**data)
+        ac_dict = DeDuplicationDict(**data)
         to_visit = [ac_dict]
         while len(to_visit) > 0:
             current = to_visit.pop()
-            self.assertEqual(isinstance(current, AutoCacheDict), True)
+            self.assertEqual(isinstance(current, DeDuplicationDict), True)
             self.assertEqual(ac_dict.value_dict, current.value_dict)
 
             for k, v in current.key_dict.items():
-                if isinstance(v, AutoCacheDict):
+                if isinstance(v, DeDuplicationDict):
                     to_visit.append(v)
                 elif isinstance(v, str):
                     self.assertIn(v, current.value_dict)
@@ -58,13 +58,13 @@ class TestMain(unittest.TestCase):
         with open('test.json', "r") as f:
             data = json.load(f)
 
-        ac_dict = AutoCacheDict(**data)
+        ac_dict = DeDuplicationDict(**data)
         to_visit = [(ac_dict, data)]
         while to_visit:
             ac_dict, data = to_visit.pop()
             for k, v in data.items():
                 if isinstance(v, dict):
-                    self.assertIsInstance(ac_dict[k], AutoCacheDict)
+                    self.assertIsInstance(ac_dict[k], DeDuplicationDict)
                     to_visit.append((ac_dict[k], v))
                 else:
                     self.assertEqual(ac_dict[k], v)
@@ -73,7 +73,7 @@ class TestMain(unittest.TestCase):
         with open('test.json', "r") as f:
             data = json.load(f)
 
-        ac_dict = AutoCacheDict(**data)
+        ac_dict = DeDuplicationDict(**data)
         with self.assertRaises(KeyError):
             _ = ac_dict['nonexistent_key']
 
@@ -81,13 +81,13 @@ class TestMain(unittest.TestCase):
         with open('test.json', "r") as f:
             data = json.load(f)
 
-        ac_dict = AutoCacheDict()
+        ac_dict = DeDuplicationDict()
         to_visit = [(ac_dict, data)]
         while to_visit:
             ac_dict, data = to_visit.pop()
             for k, v in data.items():
                 if isinstance(v, dict):
-                    ac_dict[k] = AutoCacheDict()
+                    ac_dict[k] = DeDuplicationDict()
                     to_visit.append((ac_dict[k], v))
                 else:
                     ac_dict[k] = v
@@ -100,13 +100,13 @@ class TestMain(unittest.TestCase):
         with open('test.json', "r") as f:
             data = json.load(f)
 
-        ac_dict = AutoCacheDict()
+        ac_dict = DeDuplicationDict()
         to_visit = [(ac_dict, data)]
         while to_visit:
             ac_dict, data = to_visit.pop()
             for k, v in data.items():
                 if isinstance(v, dict):
-                    ac_dict[k] = AutoCacheDict()
+                    ac_dict[k] = DeDuplicationDict()
                     to_visit.append((ac_dict[k], v))
                 else:
                     ac_dict[k] = v
@@ -123,7 +123,7 @@ class TestMain(unittest.TestCase):
         with open('test.json', "r") as f:
             data = json.load(f)
 
-        ac_dict1 = AutoCacheDict(**data)
+        ac_dict1 = DeDuplicationDict(**data)
         ac_dict2 = ac_dict1.detach()
         diff = deepdiff.DeepDiff(ac_dict1, ac_dict2)
         self.assertEqual(ac_dict1, ac_dict2)
@@ -134,7 +134,7 @@ class TestMain(unittest.TestCase):
         with open('test.json', "r") as f:
             data = json.load(f)
 
-        ac_dict = AutoCacheDict(**data)
+        ac_dict = DeDuplicationDict(**data)
         to_visit = [(ac_dict, data)]
         while to_visit:
             ac_dict, data = to_visit.pop()
@@ -162,7 +162,7 @@ class TestMain(unittest.TestCase):
         with open('test.json', "r") as f:
             data = json.load(f)
 
-        ac_dict = AutoCacheDict(**data)
+        ac_dict = DeDuplicationDict(**data)
         with self.assertRaises(KeyError):
             del ac_dict['nonexistent_key']
 
@@ -170,7 +170,7 @@ class TestMain(unittest.TestCase):
         with open('test.json', "r") as f:
             data = json.load(f)
 
-        ac_dict = AutoCacheDict(**data)
+        ac_dict = DeDuplicationDict(**data)
         to_visit = [(ac_dict, data)]
         while to_visit:
             ac_dict, data = to_visit.pop()
@@ -186,7 +186,7 @@ class TestMain(unittest.TestCase):
         with open('test.json', "r") as f:
             data = json.load(f)
 
-        ac_dict = AutoCacheDict(**data)
+        ac_dict = DeDuplicationDict(**data)
         to_visit = [(ac_dict, data)]
         while to_visit:
             ac_dict, data = to_visit.pop()
@@ -199,14 +199,14 @@ class TestMain(unittest.TestCase):
                 to_visit.append((ac_dict[k], v))
 
     def test_repr(self):
-        ac_dict = AutoCacheDict()
-        self.assertIn("AutoCacheDict", repr(ac_dict))
+        ac_dict = DeDuplicationDict()
+        self.assertIn("DeDuplicationDict", repr(ac_dict))
 
     def test_contains(self):
         with open('test.json', "r") as f:
             data = json.load(f)
 
-        ac_dict = AutoCacheDict(**data)
+        ac_dict = DeDuplicationDict(**data)
         to_visit = [(ac_dict, data)]
         while to_visit:
             ac_dict, data = to_visit.pop()
@@ -222,7 +222,7 @@ class TestMain(unittest.TestCase):
         with open('test.json', "r") as f:
             data = json.load(f)
 
-        ac_dict = AutoCacheDict(**data)
+        ac_dict = DeDuplicationDict(**data)
         json_auto_cache_dict = json.dumps(ac_dict.to_dict(), sort_keys=True)
         json_data = json.dumps(data, sort_keys=True)
         self.assertEqual(json_auto_cache_dict, json_data)
@@ -231,7 +231,7 @@ class TestMain(unittest.TestCase):
         with open('test.json', "r") as f:
             data = json.load(f)
 
-        ac_dict = AutoCacheDict.from_dict(data)
+        ac_dict = DeDuplicationDict.from_dict(data)
         json_auto_cache_dict = json.dumps(ac_dict.to_dict(), sort_keys=True)
         json_data = json.dumps(data, sort_keys=True)
         self.assertEqual(json_auto_cache_dict, json_data)
@@ -240,7 +240,7 @@ class TestMain(unittest.TestCase):
         with open('test.json', "r") as f:
             data = json.load(f)
 
-        ac_dict = AutoCacheDict(**data)
+        ac_dict = DeDuplicationDict(**data)
         size_auto_cache_dict = get_size(ac_dict)
         size_data = get_size(data)
         print(f"size_auto_cache_dict / size_data: {size_auto_cache_dict / size_data}")
@@ -250,7 +250,7 @@ class TestMain(unittest.TestCase):
         with open('test.json', "r") as f:
             data = json.load(f)
 
-        ac_dict = AutoCacheDict(**data)
+        ac_dict = DeDuplicationDict(**data)
         size_auto_cache_json = len(json.dumps(ac_dict.to_cache_dict()))
         size_json = len(json.dumps(data))
         print(f"size_auto_cache_json / size_json: {size_auto_cache_json / size_json}")
@@ -262,8 +262,8 @@ class TestMain(unittest.TestCase):
         with open('test.json', "r") as f:
             data = json.load(f)
 
-        ac_dict1 = AutoCacheDict(**data)
-        ac_dict2 = AutoCacheDict.from_cache_dict(ac_dict1.to_cache_dict())
+        ac_dict1 = DeDuplicationDict(**data)
+        ac_dict2 = DeDuplicationDict.from_cache_dict(ac_dict1.to_cache_dict())
         diff = deepdiff.DeepDiff(ac_dict1, ac_dict2)
         self.assertNotEqual(id(ac_dict1), id(ac_dict2))
         self.assertEqual(len(diff), 0)

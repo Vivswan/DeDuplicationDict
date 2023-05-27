@@ -12,7 +12,7 @@ if sys.version_info[:2] >= (3, 8):
 else:
     import importlib_metadata as metadata  # pragma: no cover
 
-__package__ = 'autocachedict'
+__package__ = 'deduplicationdict'
 __author__ = 'Vivswan Shah (vivswanshah@pitt.edu)'
 
 try:
@@ -36,11 +36,11 @@ V_co = TypeVar('V_co', covariant=True)  # Any type covariant containers.
 VT_co = TypeVar('VT_co', covariant=True)  # Value type covariant containers.
 
 
-class AutoCacheDict(MutableMapping):
+class DeDuplicationDict(MutableMapping):
     hash_length = 8
 
     def __init__(self, *args, _value_dict: dict = None, **kwargs):
-        self.key_dict: Dict[str, Union[str, AutoCacheDict]] = {}
+        self.key_dict: Dict[str, Union[str, DeDuplicationDict]] = {}
         self.value_dict: Dict[str, Any] = {} if _value_dict is None else _value_dict
         self.auto_clean_up = True
 
@@ -61,8 +61,8 @@ class AutoCacheDict(MutableMapping):
             del self[key]
 
         if isinstance(value, dict):
-            self.key_dict[key] = AutoCacheDict(value, _value_dict=self.value_dict)
-        elif isinstance(value, AutoCacheDict):
+            self.key_dict[key] = DeDuplicationDict(value, _value_dict=self.value_dict)
+        elif isinstance(value, DeDuplicationDict):
             self.key_dict[key] = value
             value._set_value_dict(self.value_dict)
         else:
@@ -75,7 +75,7 @@ class AutoCacheDict(MutableMapping):
             raise KeyError(key)
 
         v = self.key_dict[key]
-        if isinstance(v, (AutoCacheDict, self.__class__)):
+        if isinstance(v, (DeDuplicationDict, self.__class__)):
             return v
 
         if isinstance(v, str):
@@ -99,7 +99,7 @@ class AutoCacheDict(MutableMapping):
         for hash_id in not_in_use:
             del self.value_dict[hash_id]
 
-    def detach(self) -> AutoCacheDict:
+    def detach(self) -> DeDuplicationDict:
         return self.from_cache_dict(self.to_cache_dict())
 
     def _del_detach(self) -> None:
@@ -115,7 +115,7 @@ class AutoCacheDict(MutableMapping):
 
         v = self.key_dict[key]
         del self.key_dict[key]
-        if isinstance(v, (AutoCacheDict, self.__class__)):
+        if isinstance(v, (DeDuplicationDict, self.__class__)):
             v._del_detach()
 
         if self.auto_clean_up:
@@ -131,14 +131,14 @@ class AutoCacheDict(MutableMapping):
         return f"{self.__class__.__name__} [{len(self.key_dict)}:{len(self.value_dict)}]"
 
     def to_dict(self) -> dict:
-        return {k: v.to_dict() if isinstance(v, AutoCacheDict) else v for k, v in self.items()}
+        return {k: v.to_dict() if isinstance(v, DeDuplicationDict) else v for k, v in self.items()}
 
     @classmethod
-    def from_dict(cls, d: dict) -> AutoCacheDict:
+    def from_dict(cls, d: dict) -> DeDuplicationDict:
         return cls(**d)
 
     def _get_key_dict(self) -> dict:
-        return {k: v._get_key_dict() if isinstance(v, AutoCacheDict) else v for k, v in self.key_dict.items()}
+        return {k: v._get_key_dict() if isinstance(v, DeDuplicationDict) else v for k, v in self.key_dict.items()}
 
     def to_cache_dict(self) -> dict:
         return {
@@ -147,7 +147,7 @@ class AutoCacheDict(MutableMapping):
         }
 
     @classmethod
-    def from_cache_dict(cls, d: dict, _v: dict = None) -> AutoCacheDict:
+    def from_cache_dict(cls, d: dict, _v: dict = None) -> DeDuplicationDict:
         if _v is None:
             return cls.from_cache_dict(d['key_dict'], _v=d['value_dict'])
 
