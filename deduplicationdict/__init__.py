@@ -273,6 +273,18 @@ class DeDuplicationDict(MutableMapping):
 
         return {k: v._get_key_dict() if isinstance(v, DeDuplicationDict) else v for k, v in self.key_dict.items()}
 
+    def to_json_save_dict(self) -> dict:
+        """Convert the DeDuplicationDict instance to a dictionary that can be saved to a JSON file.
+
+        Returns:
+            dict: A dictionary that can be saved to a JSON file.
+        """
+
+        return {
+            'key_dict': self._get_key_dict(),
+            'value_dict': self.value_dict
+        }
+
     def _set_key_dict(self, key_dict: dict) -> DeDuplicationDict:
         """Set the key dictionary of the DeDuplicationDict instance from a normal dictionary format.
 
@@ -294,18 +306,6 @@ class DeDuplicationDict(MutableMapping):
 
         return self
 
-    def to_json_save_dict(self) -> dict:
-        """Convert the DeDuplicationDict instance to a dictionary that can be saved to a JSON file.
-
-        Returns:
-            dict: A dictionary that can be saved to a JSON file.
-        """
-
-        return {
-            'key_dict': self._get_key_dict(),
-            'value_dict': self.value_dict
-        }
-
     @classmethod
     def from_json_save_dict(cls, d: dict, _v: dict = None) -> DeDuplicationDict:
         """Create a DeDuplicationDict instance from a dictionary that was saved to a JSON file.
@@ -322,13 +322,6 @@ class DeDuplicationDict(MutableMapping):
             return cls.from_json_save_dict(d['key_dict'], _v=d['value_dict'])
 
         new_dict = cls()
-        new_dict.key_dict = {}
         new_dict.value_dict = _v
-
-        for k, v in d.items():
-            if isinstance(v, dict):
-                new_dict.key_dict[k] = cls.from_json_save_dict(v, _v=_v)
-            else:
-                new_dict.key_dict[k] = v
-
+        new_dict._set_key_dict(d)
         return new_dict

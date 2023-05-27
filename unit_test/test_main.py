@@ -297,9 +297,9 @@ class TestMain(unittest.TestCase):
         dd_dict = DeDuplicationDict(**data)
         size_dd_dict = get_size(dd_dict)
         size_data = get_size(data)
-        print(f'size_dd_dict: {size_dd_dict}')
-        print(f'size_data: {size_data}')
-        print(f'size_dd_dict / size_data: {size_dd_dict / size_data}')
+        print(f'size_dd_dict: {size_dd_dict / 1024 / 1024:0.3f} MB')
+        print(f'size_data: {size_data / 1024 / 1024:0.3f} MB')
+        print(f'size reduction: {size_data / size_dd_dict:0.3f}x')
         self.assertLessEqual(size_dd_dict, size_data)
 
     def test_json_size_compression(self):
@@ -309,9 +309,9 @@ class TestMain(unittest.TestCase):
         dd_dict = DeDuplicationDict(**data)
         size_dd_json = get_size(json.dumps(dd_dict.to_json_save_dict()))
         size_json = get_size(json.dumps(data))
-        print(f'size_dd_json: {size_dd_json}')
-        print(f'size_json: {size_json}')
-        print(f'size_dd_json / size_json: {size_dd_json / size_json}')
+        print(f'size_dd_json: {size_dd_json / 1024 / 1024:0.3f} MB')
+        print(f'size_json: {size_json / 1024 / 1024:0.3f} MB')
+        print(f'size reduction: {size_json / size_dd_json:0.3f}x')
         self.assertLessEqual(size_dd_json, size_json)
 
     def test_cache_dict(self):
