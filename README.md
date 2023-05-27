@@ -24,3 +24,6 @@ dictionaries and `DeDuplicationDict` instances.
 pip install deduplicationdict
 ```
 
+## More Documentation
+
+coming soon...
