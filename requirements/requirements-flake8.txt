@@ -1,0 +1,11 @@
+# Testing
+flake8
+flake8-docstrings
+flake8-quotes
+flake8-bugbear
+flake8-comprehensions
+flake8-executable
+flake8-coding
+flake8-return
+# flake8-noreturn>=1.0.1; python_version >= '3.8'
+flake8-deprecated
