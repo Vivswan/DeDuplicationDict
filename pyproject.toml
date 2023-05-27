@@ -11,6 +11,12 @@ name = "deduplicationdict"
 [tool.setuptools]
 py-modules = ['deduplicationdict']
 
+[tool.setuptools.package-data]
+"deduplicationdict" = ["py.typed"]
+
+[tool.setuptools.packages.find]
+where = ["deduplicationdict"]
+
 [project]
 # $ pip install deduplicationdict
 name = "deduplicationdict"
@@ -110,3 +116,8 @@ all = ["deduplicationdict[dev,doc,test]"]
 "Homepage" = "https://github.com/Vivswan/DeDuplicationDict"
 "Say Thanks!" = "https://vivswan.github.io/"
 "Source" = "https://github.com/Vivswan/DeDuplicationDict"
+
+# pytest configuration
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--cov=deduplicationdict --cov-report=xml --cov-report=html"
