@@ -21,7 +21,7 @@ except Exception:
 # Project information
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 project = 'DeDuplicationDict'
-copyright = f'2021-{date.today().year}, Vivswan Shah (vivswanshah@pitt.edu)'
+copyright = f'2023-{date.today().year}, Vivswan Shah (vivswanshah@pitt.edu)'
 author = 'Vivswan Shah'
 release = __version__
 
@@ -91,14 +91,14 @@ html_theme = 'furo'
 html_static_path = ['_static']
 html_css_files = ['custom.css']
 html_theme_options = {
-    # 'light_logo': 'analogvnn-logo-wide-white.svg',
-    # 'dark_logo': 'analogvnn-logo-wide-black.svg',
+    'light_logo': 'deduplicationdict-logo-wide-white.svg',
+    'dark_logo': 'deduplicationdict-logo-wide-black.svg',
     'source_repository': 'https://github.com/Vivswan/DeDuplicationDict',
     'source_branch': 'release',
     'source_directory': 'docs/',
 }
-# html_logo = '_static/analogvnn-logo-wide-black.svg'
-# html_favicon = '_static/analogvnn-logo-square-black.svg'
+# html_logo = '_static/deduplicationdict-logo-wide-black.svg'
+html_favicon = '_static/deduplicationdict-logo-square-black.svg'
 html_title = f'DeDuplicationDict {release}'
 
 # Options for EPUB output
