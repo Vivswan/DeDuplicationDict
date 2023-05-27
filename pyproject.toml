@@ -102,7 +102,11 @@ dev = [
     "twine", # to publish on pypi {twine upload --repository-url=https://test.pypi.org/legacy/ dist/*} {twine upload dist/*}
     "johnnydep", # to see dependencies {johnnydep <package>}
 ]
-test = ["deduplicationdict[flake8]"]
+test = [
+    "deduplicationdict[flake8]",
+    "deepdiff",
+    "coverage",
+]
 all = ["deduplicationdict[dev,doc,test]"]
 
 [project.urls]
