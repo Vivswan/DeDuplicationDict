@@ -30,7 +30,7 @@ pip install deduplicationdict
 from deduplicationdict import DeDuplicationDict
 
 # Create a new DeDuplicationDict instance
-dedup_dict = DeDuplicationDict.from_dict({'a': [1, 2, 3], 'b': 2, 'c': [1, 2, 3]})
+dedup_dict = DeDuplicationDict.from_dict({'a': [5, 6, 7], 'b': 2, 'c': [5, 6, 7]})
 # or
 dedup_dict = DeDuplicationDict(**{'a': [5, 6, 7], 'b': 2, 'c': [5, 6, 7]})
 
@@ -51,6 +51,12 @@ print(f"dedup_dict.value_dict: {dedup_dict.value_dict}")
 # Print the deduplicated dictionary
 print(f"to_json_save_dict: {dedup_dict.to_json_save_dict()}")
 # output: {'key_dict': {'a': '7511debb', 'b': '7c7ad8f0', 'c': '7511debb', 'd': 'f9343d7d', 'e': 'f9343d7d'}, 'value_dict': {'7511debb': [5, 6, 7], '7c7ad8f0': 2, 'f9343d7d': [1, 2, 3]}}
+
+assert dedup_dict["a"] == [5, 6, 7]
+assert dedup_dict["b"] == 2
+assert dedup_dict["c"] == [5, 6, 7]
+assert dedup_dict["d"] == [1, 2, 3]
+assert dedup_dict["e"] == [1, 2, 3]
 assert DeDuplicationDict.from_json_save_dict(dedup_dict.to_json_save_dict()).to_dict() == dedup_dict.to_dict()
 ```
 
