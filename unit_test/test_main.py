@@ -7,7 +7,17 @@ from deduplicationdict import DeDuplicationDict
 
 
 def get_size(obj, seen=None):
-    """Recursively finds size of objects"""
+    """
+    Recursively finds the size of objects.
+
+    Args:
+        obj: The object to calculate the size of.
+        seen (set, optional): A set of objects that have already been seen. Defaults to None.
+
+    Returns:
+        int: The size of the object in bytes.
+    """
+
     size = sys.getsizeof(obj)
     if seen is None:
         seen = set()
@@ -28,15 +38,21 @@ def get_size(obj, seen=None):
 
 
 class TestMain(unittest.TestCase):
+    """Test the main functionality of the DeDuplicationDict class."""
+
     def test_init(self):
-        with open('test.json', "r") as f:
+        """ Test the initialization of the DeDuplicationDict class with data from a JSON file."""
+
+        with open('test.json', 'r') as f:
             data = json.load(f)
 
         ac_dict = DeDuplicationDict(**data)
         self.assertEqual(len(ac_dict), len(data))
 
     def test_value_dict_consistency(self):
-        with open('test.json', "r") as f:
+        """Test the consistency of the value_dict attribute in the DeDuplicationDict class."""
+
+        with open('test.json', 'r') as f:
             data = json.load(f)
 
         ac_dict = DeDuplicationDict(**data)
@@ -46,16 +62,18 @@ class TestMain(unittest.TestCase):
             self.assertEqual(isinstance(current, DeDuplicationDict), True)
             self.assertEqual(ac_dict.value_dict, current.value_dict)
 
-            for k, v in current.key_dict.items():
+            for v in current.key_dict.values():
                 if isinstance(v, DeDuplicationDict):
                     to_visit.append(v)
                 elif isinstance(v, str):
                     self.assertIn(v, current.value_dict)
                 else:
-                    raise TypeError(f"WTF? {type(v)}")
+                    raise TypeError(f'WTF? {type(v)}')
 
     def test_getitem(self):
-        with open('test.json', "r") as f:
+        """Test the __getitem__ method of the DeDuplicationDict class."""
+
+        with open('test.json', 'r') as f:
             data = json.load(f)
 
         ac_dict = DeDuplicationDict(**data)
@@ -70,7 +88,9 @@ class TestMain(unittest.TestCase):
                     self.assertEqual(ac_dict[k], v)
 
     def test_getitem_keyerror(self):
-        with open('test.json', "r") as f:
+        """Test the KeyError raised by the __getitem__ method of the DeDuplicationDict class."""
+
+        with open('test.json', 'r') as f:
             data = json.load(f)
 
         ac_dict = DeDuplicationDict(**data)
@@ -78,7 +98,9 @@ class TestMain(unittest.TestCase):
             _ = ac_dict['nonexistent_key']
 
     def test_setitem(self):
-        with open('test.json', "r") as f:
+        """Test the __setitem__ method of the DeDuplicationDict class."""
+
+        with open('test.json', 'r') as f:
             data = json.load(f)
 
         ac_dict = DeDuplicationDict()
@@ -97,7 +119,9 @@ class TestMain(unittest.TestCase):
         self.assertEqual(json_auto_cache_dict, json_data)
 
     def test_double_setitem(self):
-        with open('test.json', "r") as f:
+        """Test the __setitem__ method of the DeDuplicationDict class when setting the same item twice."""
+
+        with open('test.json', 'r') as f:
             data = json.load(f)
 
         ac_dict = DeDuplicationDict()
@@ -117,10 +141,12 @@ class TestMain(unittest.TestCase):
         self.assertEqual(json_auto_cache_dict, json_data)
 
     def test_detach(self):
+        """Test the detach method of the DeDuplicationDict class."""
+
         # noinspection PyPackageRequirements
         import deepdiff
 
-        with open('test.json', "r") as f:
+        with open('test.json', 'r') as f:
             data = json.load(f)
 
         ac_dict1 = DeDuplicationDict(**data)
@@ -131,7 +157,9 @@ class TestMain(unittest.TestCase):
         self.assertEqual(len(diff), 0)
 
     def test_delitem(self):
-        with open('test.json', "r") as f:
+        """Test the __delitem__ method of the DeDuplicationDict class."""
+
+        with open('test.json', 'r') as f:
             data = json.load(f)
 
         ac_dict = DeDuplicationDict(**data)
@@ -159,7 +187,9 @@ class TestMain(unittest.TestCase):
         self.assertEqual(len(ac_dict), 0)
 
     def test_delitem_keyerror(self):
-        with open('test.json', "r") as f:
+        """Test the KeyError raised by the __delitem__ method of the DeDuplicationDict class."""
+
+        with open('test.json', 'r') as f:
             data = json.load(f)
 
         ac_dict = DeDuplicationDict(**data)
@@ -167,7 +197,9 @@ class TestMain(unittest.TestCase):
             del ac_dict['nonexistent_key']
 
     def test_len(self):
-        with open('test.json', "r") as f:
+        """Test the __len__ method of the DeDuplicationDict class."""
+
+        with open('test.json', 'r') as f:
             data = json.load(f)
 
         ac_dict = DeDuplicationDict(**data)
@@ -183,7 +215,9 @@ class TestMain(unittest.TestCase):
                 to_visit.append((ac_dict[k], v))
 
     def test_iter(self):
-        with open('test.json', "r") as f:
+        """Test the __iter__ method of the DeDuplicationDict class."""
+
+        with open('test.json', 'r') as f:
             data = json.load(f)
 
         ac_dict = DeDuplicationDict(**data)
@@ -199,11 +233,15 @@ class TestMain(unittest.TestCase):
                 to_visit.append((ac_dict[k], v))
 
     def test_repr(self):
+        """Test the __repr__ method of the DeDuplicationDict class."""
+
         ac_dict = DeDuplicationDict()
-        self.assertIn("DeDuplicationDict", repr(ac_dict))
+        self.assertIn('DeDuplicationDict', repr(ac_dict))
 
     def test_contains(self):
-        with open('test.json', "r") as f:
+        """Test the __contains__ method of the DeDuplicationDict class."""
+
+        with open('test.json', 'r') as f:
             data = json.load(f)
 
         ac_dict = DeDuplicationDict(**data)
@@ -219,7 +257,9 @@ class TestMain(unittest.TestCase):
                 to_visit.append((ac_dict[k], v))
 
     def test_to_dict(self):
-        with open('test.json', "r") as f:
+        """Test the to_dict method of the DeDuplicationDict class."""
+
+        with open('test.json', 'r') as f:
             data = json.load(f)
 
         ac_dict = DeDuplicationDict(**data)
@@ -228,7 +268,9 @@ class TestMain(unittest.TestCase):
         self.assertEqual(json_auto_cache_dict, json_data)
 
     def test_from_dict(self):
-        with open('test.json', "r") as f:
+        """Test the from_dict method of the DeDuplicationDict class."""
+
+        with open('test.json', 'r') as f:
             data = json.load(f)
 
         ac_dict = DeDuplicationDict.from_dict(data)
@@ -237,33 +279,39 @@ class TestMain(unittest.TestCase):
         self.assertEqual(json_auto_cache_dict, json_data)
 
     def test_size_compression(self):
-        with open('test.json', "r") as f:
+        """Test the size compression of the DeDuplicationDict class."""
+
+        with open('test.json', 'r') as f:
             data = json.load(f)
 
         ac_dict = DeDuplicationDict(**data)
         size_auto_cache_dict = get_size(ac_dict)
         size_data = get_size(data)
-        print(f"size_auto_cache_dict / size_data: {size_auto_cache_dict / size_data}")
+        print(f'size_auto_cache_dict / size_data: {size_auto_cache_dict / size_data}')
         self.assertLessEqual(size_auto_cache_dict, size_data)
 
     def test_json_size_compression(self):
-        with open('test.json', "r") as f:
+        """Test the json size compression of the DeDuplicationDict class."""
+
+        with open('test.json', 'r') as f:
             data = json.load(f)
 
         ac_dict = DeDuplicationDict(**data)
-        size_auto_cache_json = len(json.dumps(ac_dict.to_cache_dict()))
+        size_auto_cache_json = len(json.dumps(ac_dict.to_json_save_dict()))
         size_json = len(json.dumps(data))
-        print(f"size_auto_cache_json / size_json: {size_auto_cache_json / size_json}")
+        print(f'size_auto_cache_json / size_json: {size_auto_cache_json / size_json}')
         self.assertLessEqual(size_auto_cache_json, size_json)
 
     def test_cache_dict(self):
+        """Test the cache_dict method of the DeDuplicationDict class."""
+
         # noinspection PyPackageRequirements
         import deepdiff
-        with open('test.json', "r") as f:
+        with open('test.json', 'r') as f:
             data = json.load(f)
 
         ac_dict1 = DeDuplicationDict(**data)
-        ac_dict2 = DeDuplicationDict.from_cache_dict(ac_dict1.to_cache_dict())
+        ac_dict2 = DeDuplicationDict.from_json_save_dict(ac_dict1.to_json_save_dict())
         diff = deepdiff.DeepDiff(ac_dict1, ac_dict2)
         self.assertNotEqual(id(ac_dict1), id(ac_dict2))
         self.assertEqual(len(diff), 0)
