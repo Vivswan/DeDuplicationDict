@@ -1,6 +1,7 @@
 # DeDuplicationDict
 
 [![PyPI version](https://badge.fury.io/py/deduplicationdict.svg)](https://badge.fury.io/py/deduplicationdict)
+[![Python package](https://github.com/Vivswan/DeDuplicationDict/actions/workflows/unittest.yaml/badge.svg)](https://github.com/Vivswan/DeDuplicationDict/actions/workflows/unittest.yaml)
 [![Documentation Status](https://readthedocs.org/projects/deduplicationdict/badge/?version=release)](https://deduplicationdict.readthedocs.io/en/release/?badge=release)
 [![Python](https://img.shields.io/badge/python-3.7--3.12-blue)](https://badge.fury.io/py/deduplicationdict)
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-blue.svg)](https://opensource.org/licenses/MPL-2.0)
