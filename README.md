@@ -1,6 +1,7 @@
 # DeDuplicationDict
 
 [![PyPI version](https://badge.fury.io/py/deduplicationdict.svg)](https://badge.fury.io/py/deduplicationdict)
+[![Python package](https://github.com/Vivswan/DeDuplicationDict/actions/workflows/unittest.yaml/badge.svg)](https://github.com/Vivswan/DeDuplicationDict/actions/workflows/unittest.yaml)
 [![Documentation Status](https://readthedocs.org/projects/deduplicationdict/badge/?version=release)](https://deduplicationdict.readthedocs.io/en/release/?badge=release)
 [![Python](https://img.shields.io/badge/python-3.7--3.12-blue)](https://badge.fury.io/py/deduplicationdict)
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-blue.svg)](https://opensource.org/licenses/MPL-2.0)
@@ -60,6 +61,9 @@ assert dedup_dict["e"] == [1, 2, 3]
 assert DeDuplicationDict.from_json_save_dict(dedup_dict.to_json_save_dict()).to_dict() == dedup_dict.to_dict()
 ```
 
+Usage
+with [SqliteDict](https://github.com/RaRe-Technologies/sqlitedict): [SqliteDeDuplicationDict.py](https://gist.github.com/Vivswan/6fca547b2927e0bf11743869058d4b10)
+
 ## Results from Testing
 
 | Method              | JSON Memory (MB) | In-Memory (MB) |
@@ -70,6 +74,7 @@ assert DeDuplicationDict.from_json_save_dict(dedup_dict.to_json_save_dict()).to_
 | _Memory Saving_     |    **7.868x**    |   **7.235x**   |
 
 [//]: # (![dict vs DeDuplicationDict]&#40;https://github.com/Vivswan/DeDuplicationDict/raw/release/docs/_static/dict_vs_DeDuplicationDict.svg&#41;)
+
 ![dict vs DeDuplicationDict](docs/_static/dict_vs_DeDuplicationDict.svg)
 
 ## Documentation
