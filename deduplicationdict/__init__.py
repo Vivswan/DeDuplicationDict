@@ -71,11 +71,14 @@ class DeDuplicationDict(MutableMapping):
         for k, v in dict(*args, **kwargs).items():
             self[k] = v
 
-    def _set_value_dict(self, value_dict: dict) -> None:
+    def _set_value_dict(self, value_dict: dict) -> DeDuplicationDict:
         """Update the value dictionary and propagate the changes to nested DeDuplicationDict instances.
 
         Args:
             value_dict (dict): The new value dictionary to use for deduplication.
+
+        Return:
+            DeDuplicationDict: self
         """
 
         value_dict.update(self.value_dict)
@@ -85,6 +88,8 @@ class DeDuplicationDict(MutableMapping):
                 continue
 
             v._set_value_dict(value_dict)
+
+        return self
 
     def __setitem__(self, key: KT, value: VT) -> None:
         """Set the value for the given key, deduplicating the value if necessary.
@@ -105,7 +110,9 @@ class DeDuplicationDict(MutableMapping):
         else:
             hash_id = sha256(pickle.dumps(value)).hexdigest()[:self.hash_length]
             self.key_dict[key] = hash_id
-            self.value_dict[hash_id] = value
+
+            if hash_id not in self.value_dict:
+                self.value_dict[hash_id] = value
 
     def __getitem__(self, key: KT) -> VT_co:
         """Get the value for the given key.
@@ -148,14 +155,20 @@ class DeDuplicationDict(MutableMapping):
                 all_hashes_in_use.update(v.all_hashes_in_use())
         return all_hashes_in_use
 
-    def clean_up(self) -> None:
-        """Remove unused hash values from the value dictionary."""
+    def clean_up(self) -> DeDuplicationDict:
+        """Remove unused hash values from the value dictionary.
+
+        Return:
+            DeDuplicationDict: self
+        """
 
         all_hashes_in_use = self.all_hashes_in_use()
         all_hashes = set(self.value_dict.keys())
         not_in_use = all_hashes - all_hashes_in_use
         for hash_id in not_in_use:
             del self.value_dict[hash_id]
+
+        return self
 
     def detach(self) -> DeDuplicationDict:
         """Detach the DeDuplicationDict instance from its value dictionary, creating a standalone instance.
@@ -166,14 +179,20 @@ class DeDuplicationDict(MutableMapping):
 
         return self.from_json_save_dict(self.to_json_save_dict())
 
-    def _del_detach(self) -> None:
-        """Detach the DeDuplicationDict instance from its value dictionary and clean up unused hash values."""
+    def _del_detach(self) -> DeDuplicationDict:
+        """Detach the DeDuplicationDict instance from its value dictionary and clean up unused hash values.
+
+        Return:
+            DeDuplicationDict: self
+        """
 
         self._set_value_dict({})
         self.clean_up()
 
         for k, v in self.value_dict.items():
             self.value_dict[k] = copy.deepcopy(v)
+
+        return self
 
     def __delitem__(self, key: KT) -> None:
         """Delete the item with the given key.
@@ -266,6 +285,27 @@ class DeDuplicationDict(MutableMapping):
             'value_dict': self.value_dict
         }
 
+    def _set_key_dict(self, key_dict: dict) -> DeDuplicationDict:
+        """Set the key dictionary of the DeDuplicationDict instance from a normal dictionary format.
+
+        Args:
+            key_dict (dict): The key dictionary to set.
+
+        Returns:
+            DeDuplicationDict: self
+        """
+
+        for k, v in key_dict.items():
+            if isinstance(v, dict):
+                new_dict = self.__class__()
+                new_dict.value_dict = self.value_dict
+                new_dict._set_key_dict(v)
+                self.key_dict[k] = new_dict
+            else:
+                self.key_dict[k] = v
+
+        return self
+
     @classmethod
     def from_json_save_dict(cls, d: dict, _v: dict = None) -> DeDuplicationDict:
         """Create a DeDuplicationDict instance from a dictionary that was saved to a JSON file.
@@ -282,13 +322,6 @@ class DeDuplicationDict(MutableMapping):
             return cls.from_json_save_dict(d['key_dict'], _v=d['value_dict'])
 
         new_dict = cls()
-        new_dict.key_dict = {}
         new_dict.value_dict = _v
-
-        for k, v in d.items():
-            if isinstance(v, dict):
-                new_dict.key_dict[k] = cls.from_json_save_dict(v, _v=_v)
-            else:
-                new_dict.key_dict[k] = v
-
+        new_dict._set_key_dict(d)
         return new_dict
