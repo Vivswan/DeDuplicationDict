@@ -71,23 +71,25 @@ class DeDuplicationDict(MutableMapping):
         for k, v in dict(*args, **kwargs).items():
             self[k] = v
 
-    def _set_value_dict(self, value_dict: dict) -> DeDuplicationDict:
+    def _set_value_dict(self, value_dict: dict, skip_update: bool = False) -> DeDuplicationDict:
         """Update the value dictionary and propagate the changes to nested DeDuplicationDict instances.
 
         Args:
             value_dict (dict): The new value dictionary to use for deduplication.
+            skip_update (bool): Whether to skip updating the value dictionary of nested
 
         Return:
             DeDuplicationDict: self
         """
 
-        value_dict.update(self.value_dict)
+        if not skip_update:
+            value_dict.update(self.value_dict)
         self.value_dict = value_dict
         for v in self.key_dict.values():
             if isinstance(v, str):
                 continue
 
-            v._set_value_dict(value_dict)
+            v._set_value_dict(value_dict, skip_update=skip_update)
 
         return self
 
@@ -106,7 +108,8 @@ class DeDuplicationDict(MutableMapping):
             self.key_dict[key] = DeDuplicationDict(value, _value_dict=self.value_dict)
         elif isinstance(value, DeDuplicationDict):
             self.key_dict[key] = value
-            value._set_value_dict(self.value_dict)
+            self.value_dict.update(value.value_dict)
+            value._set_value_dict(self.value_dict, skip_update=True)
         else:
             hash_id = sha256(pickle.dumps(value)).hexdigest()[:self.hash_length]
             self.key_dict[key] = hash_id
