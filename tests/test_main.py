@@ -39,7 +39,8 @@ def get_size(obj, seen=None):
 
 
 def get_json_test_data():
-    with open(Path(__file__).parent.joinpath('test.json'), 'r', encoding="utf-8") as f:
+    """Get the test data from a JSON file."""
+    with open(Path(__file__).parent.joinpath('test.json'), 'r', encoding='utf-8') as f:
         data = json.load(f)
     return data
 
@@ -194,8 +195,8 @@ class TestMain(unittest.TestCase):
             dd_dict, data = to_visit.pop()
             for k, v in list(data.items()):
                 dd_data2 = DeDuplicationDict(**data)
-                dd_data2["test"] = copy.deepcopy(dd_dict)
-                dd_dict2 = dd_data2["test"].detach()
+                dd_data2['test'] = copy.deepcopy(dd_dict)
+                dd_dict2 = dd_data2['test'].detach()
                 self.assertEqual(len(deepdiff.DeepDiff(dd_dict, dd_dict2)), 0)
                 self.assertEqual(dd_dict.all_hashes_in_use(), set(dd_dict.value_dict.keys()))
                 self.assertEqual(dd_dict2.all_hashes_in_use(), set(dd_dict2.value_dict.keys()))
