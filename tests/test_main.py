@@ -365,6 +365,18 @@ class TestMain(unittest.TestCase):
         self.assertNotEqual(id(dd_dict1), id(dd_dict2))
         self.assertEqual(len(diff), 0)
 
+    def test_deepcopy(self):
+        """Test the deepcopy method of the DeDuplicationDict class."""
+
+        # noinspection PyPackageRequirements
+        import deepdiff
+        data = get_json_test_data()
+        dd_dict1 = DeDuplicationDict(**data)
+        dd_dict2 = copy.deepcopy(dd_dict1)
+        diff = deepdiff.DeepDiff(dd_dict1, dd_dict2)
+        self.assertNotEqual(id(dd_dict1), id(dd_dict2))
+        self.assertEqual(len(diff), 0)
+
 
 if __name__ == '__main__':
     unittest.main()
