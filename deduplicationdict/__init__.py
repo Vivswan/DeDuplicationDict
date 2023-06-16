@@ -126,29 +126,6 @@ class DeDuplicationDict(MutableMapping):
 
         self._value_dict = value_dict
 
-    def _set_value_dict(self, value_dict: dict) -> DeDuplicationDict:
-        """Update the value dictionary and propagate the changes to nested DeDuplicationDict instances.
-
-        Args:
-            value_dict (dict): The new value dictionary to use for deduplication.
-
-        Return:
-            DeDuplicationDict: self
-        """
-
-        if id(self.value_dict) is id(value_dict):
-            return self
-
-        value_dict.update(self.value_dict)
-        self.value_dict = value_dict
-        # for v in self.key_dict.values():
-        #     if isinstance(v, str):
-        #         continue
-        #
-        #     v._set_value_dict(value_dict)
-
-        return self
-
     def __setitem__(self, key: KT, value: VT) -> None:
         """Set the value for the given key, deduplicating the value if necessary.
 
