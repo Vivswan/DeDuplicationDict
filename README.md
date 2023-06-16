@@ -61,8 +61,8 @@ assert dedup_dict["e"] == [1, 2, 3]
 assert DeDuplicationDict.from_json_save_dict(dedup_dict.to_json_save_dict()).to_dict() == dedup_dict.to_dict()
 ```
 
-Usage
-with [SqliteDict](https://github.com/RaRe-Technologies/sqlitedict): [SqliteDeDuplicationDict.py](https://gist.github.com/Vivswan/6fca547b2927e0bf11743869058d4b10)
+Usage with [SqliteDict](https://github.com/RaRe-Technologies/sqlitedict):
+[SqliteDeDuplicationDict.py](https://gist.github.com/Vivswan/6fca547b2927e0bf11743869058d4b10)
 
 ## Results from Testing
 
