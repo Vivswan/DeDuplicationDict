@@ -55,6 +55,7 @@ class DeDuplicationDict(MutableMapping):
 
     hash_length: int = 8
     auto_clean_up: bool = True
+    skip_update_on_setitem: bool = True
 
     def __init__(self, *args, _value_dict: dict = None, **kwargs):
         """Initialize a DeDuplicationDict instance.
@@ -109,7 +110,7 @@ class DeDuplicationDict(MutableMapping):
         elif isinstance(value, DeDuplicationDict):
             self.key_dict[key] = value
             self.value_dict.update(value.value_dict)
-            value._set_value_dict(self.value_dict, skip_update=True)
+            value._set_value_dict(self.value_dict, skip_update=self.skip_update_on_setitem)
         else:
             hash_id = sha256(pickle.dumps(value)).hexdigest()[:self.hash_length]
             self.key_dict[key] = hash_id
