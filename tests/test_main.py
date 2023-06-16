@@ -1,3 +1,4 @@
+import copy
 import json
 import sys
 import unittest
@@ -184,6 +185,7 @@ class TestMain(unittest.TestCase):
         """Test the __delitem__ method of the DeDuplicationDict class."""
 
         # noinspection PyPackageRequirements
+        import deepdiff
 
         data = get_json_test_data()
         dd_dict = DeDuplicationDict(**data)
@@ -191,7 +193,12 @@ class TestMain(unittest.TestCase):
         while to_visit:
             dd_dict, data = to_visit.pop()
             for k, v in list(data.items()):
+                dd_data2 = DeDuplicationDict(**data)
+                dd_data2["test"] = copy.deepcopy(dd_dict)
+                dd_dict2 = dd_data2["test"].detach()
+                self.assertEqual(len(deepdiff.DeepDiff(dd_dict, dd_dict2)), 0)
                 self.assertEqual(dd_dict.all_hashes_in_use(), set(dd_dict.value_dict.keys()))
+                self.assertEqual(dd_dict2.all_hashes_in_use(), set(dd_dict2.value_dict.keys()))
 
                 if isinstance(v, dict):
                     to_visit.append((dd_dict[k], v))

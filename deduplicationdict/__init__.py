@@ -179,6 +179,18 @@ class DeDuplicationDict(MutableMapping):
 
         return self.from_json_save_dict(self.to_json_save_dict())
 
+    def __deepcopy__(self, memo: dict) -> DeDuplicationDict:
+        """Create a deep copy of the DeDuplicationDict instance.
+
+        Args:
+            memo (dict): A dictionary of memoized values.
+
+        Returns:
+            DeDuplicationDict: A new DeDuplicationDict instance with its own value dictionary.
+        """
+
+        return self.detach()
+
     def _del_detach(self) -> DeDuplicationDict:
         """Detach the DeDuplicationDict instance from its value dictionary and clean up unused hash values.
 
