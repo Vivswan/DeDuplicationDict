@@ -5,7 +5,7 @@ import pickle
 import sys
 from collections.abc import MutableMapping
 from hashlib import sha256
-from typing import Iterator, TypeVar, Union, Dict, Any
+from typing import Iterator, TypeVar, Union, Dict, Any, Optional
 
 __all__ = ['__package__', '__author__', '__version__', 'DeDuplicationDict']
 
@@ -66,10 +66,65 @@ class DeDuplicationDict(MutableMapping):
         """
 
         self.key_dict: Dict[str, Union[str, DeDuplicationDict]] = {}
-        self.value_dict: Dict[str, Any] = {} if _value_dict is None else _value_dict
+        self._value_dict: Dict[str, Any] = {} if _value_dict is None else _value_dict
+        self._parent: Optional[DeDuplicationDict] = None
 
         for k, v in dict(*args, **kwargs).items():
             self[k] = v
+
+    @property
+    def parent(self) -> Optional[DeDuplicationDict]:
+        """Get the parent DeDuplicationDict instance.
+
+        Returns:
+            Optional[DeDuplicationDict]: The parent DeDuplicationDict instance.
+        """
+
+        return self._parent
+
+    @parent.setter
+    def parent(self, parent: Optional[DeDuplicationDict]) -> None:
+        """Set the parent DeDuplicationDict instance.
+
+        Args:
+            parent (Optional[DeDuplicationDict]): The parent DeDuplicationDict instance.
+        """
+
+        if parent is None:
+            self._value_dict = copy.deepcopy(self.value_dict)
+            self._parent = None
+            if self.auto_clean_up:
+                self.clean_up()
+        else:
+            parent.value_dict.update(self.value_dict)
+            self._parent = parent
+            self._value_dict = {}
+
+    @property
+    def value_dict(self) -> Dict[str, Any]:
+        """Get the value dictionary used for deduplication.
+
+        Returns:
+            Dict[str, Any]: The value dictionary used for deduplication.
+        """
+
+        return self._value_dict if self.parent is None else self.parent.value_dict
+
+    @value_dict.setter
+    def value_dict(self, value_dict: Dict[str, Any]) -> None:
+        """Set the value dictionary used for deduplication.
+
+        Args:
+            value_dict (Dict[str, Any]): The value dictionary to use for deduplication.
+
+        Raises:
+            AttributeError: If the parent attribute is not None.
+        """
+
+        if self.parent is not None:
+            raise AttributeError('value_dict can only be set for the root DeDuplicationDict instance.')
+
+        self._value_dict = value_dict
 
     def _set_value_dict(self, value_dict: dict) -> DeDuplicationDict:
         """Update the value dictionary and propagate the changes to nested DeDuplicationDict instances.
@@ -81,13 +136,16 @@ class DeDuplicationDict(MutableMapping):
             DeDuplicationDict: self
         """
 
+        if id(self.value_dict) is id(value_dict):
+            return self
+
         value_dict.update(self.value_dict)
         self.value_dict = value_dict
-        for v in self.key_dict.values():
-            if isinstance(v, str):
-                continue
-
-            v._set_value_dict(value_dict)
+        # for v in self.key_dict.values():
+        #     if isinstance(v, str):
+        #         continue
+        #
+        #     v._set_value_dict(value_dict)
 
         return self
 
@@ -103,10 +161,11 @@ class DeDuplicationDict(MutableMapping):
             del self[key]
 
         if isinstance(value, dict):
-            self.key_dict[key] = DeDuplicationDict(value, _value_dict=self.value_dict)
-        elif isinstance(value, DeDuplicationDict):
+            value = DeDuplicationDict(value)
+
+        if isinstance(value, DeDuplicationDict):
+            value.parent = self
             self.key_dict[key] = value
-            value._set_value_dict(self.value_dict)
         else:
             hash_id = sha256(pickle.dumps(value)).hexdigest()[:self.hash_length]
             self.key_dict[key] = hash_id
@@ -162,6 +221,9 @@ class DeDuplicationDict(MutableMapping):
             DeDuplicationDict: self
         """
 
+        if self.parent is not None:
+            return self.parent.clean_up()
+
         all_hashes_in_use = self.all_hashes_in_use()
         all_hashes = set(self.value_dict.keys())
         not_in_use = all_hashes - all_hashes_in_use
@@ -177,22 +239,10 @@ class DeDuplicationDict(MutableMapping):
             DeDuplicationDict: A new DeDuplicationDict instance with its own value dictionary.
         """
 
+        # if self.auto_clean_up:
+        #     self.clean_up()
+
         return self.from_json_save_dict(self.to_json_save_dict())
-
-    def _del_detach(self) -> DeDuplicationDict:
-        """Detach the DeDuplicationDict instance from its value dictionary and clean up unused hash values.
-
-        Return:
-            DeDuplicationDict: self
-        """
-
-        self._set_value_dict({})
-        self.clean_up()
-
-        for k, v in self.value_dict.items():
-            self.value_dict[k] = copy.deepcopy(v)
-
-        return self
 
     def __delitem__(self, key: KT) -> None:
         """Delete the item with the given key.
@@ -209,8 +259,9 @@ class DeDuplicationDict(MutableMapping):
 
         v = self.key_dict[key]
         del self.key_dict[key]
+
         if isinstance(v, (DeDuplicationDict, self.__class__)):
-            v._del_detach()
+            v.parent = None
 
         if self.auto_clean_up:
             self.clean_up()
@@ -242,6 +293,18 @@ class DeDuplicationDict(MutableMapping):
 
         return f'{self.__class__.__name__} [{len(self.key_dict)}:{len(self.value_dict)}]'
 
+    def __deepcopy__(self, memo: dict) -> DeDuplicationDict:
+        """Create a deep copy of the DeDuplicationDict instance.
+
+        Args:
+            memo (dict): A dictionary of memoized objects.
+
+        Returns:
+            DeDuplicationDict: A deep copy of the DeDuplicationDict instance.
+        """
+
+        return self.detach()
+
     def to_dict(self) -> dict:
         """Convert the DeDuplicationDict instance to a regular dictionary.
 
@@ -249,7 +312,7 @@ class DeDuplicationDict(MutableMapping):
             dict: A regular dictionary with the same key-value pairs as the DeDuplicationDict instance.
         """
 
-        return {k: v.to_dict() if isinstance(v, DeDuplicationDict) else v for k, v in self.items()}
+        return {k: (v.to_dict() if isinstance(v, DeDuplicationDict) else v) for k, v in self.items()}
 
     @classmethod
     def from_dict(cls, d: dict) -> DeDuplicationDict:

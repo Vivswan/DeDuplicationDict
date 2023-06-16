@@ -1,3 +1,4 @@
+import copy
 import json
 import sys
 import unittest
@@ -38,7 +39,7 @@ def get_size(obj, seen=None):
 
 
 def get_json_test_data():
-    with open(Path(__file__).parent.joinpath('test.json'), 'r') as f:
+    with open(Path(__file__).parent.joinpath('test.json'), 'r', encoding="utf-8") as f:
         data = json.load(f)
     return data
 
@@ -54,17 +55,19 @@ class TestMain(unittest.TestCase):
         dd_dict = DeDuplicationDict(**data)
         self.assertEqual(len(dd_dict), len(data))
 
-    def test_value_dict_consistency(self):
+    def test_value_dict_consistency(self, dd_dict=None):
         """Test the consistency of the value_dict attribute in the DeDuplicationDict class."""
 
-        data = get_json_test_data()
+        if dd_dict is None:
+            data = get_json_test_data()
+            dd_dict = DeDuplicationDict(**data)
 
-        dd_dict = DeDuplicationDict(**data)
         to_visit = [dd_dict]
         while len(to_visit) > 0:
             current = to_visit.pop()
             self.assertEqual(isinstance(current, DeDuplicationDict), True)
             self.assertEqual(dd_dict.value_dict, current.value_dict)
+            self.assertEqual(id(dd_dict.value_dict), id(current.value_dict))
 
             for v in current.key_dict.values():
                 if isinstance(v, DeDuplicationDict):
@@ -114,13 +117,18 @@ class TestMain(unittest.TestCase):
 
         json_dd_dict = json.dumps(dd_dict.to_dict(), sort_keys=True)
         json_data = json.dumps(data, sort_keys=True)
+        self.test_value_dict_consistency(dd_dict)
         self.assertEqual(json_dd_dict, json_data)
 
     def test_double_setitem(self):
         """Test the __setitem__ method of the DeDuplicationDict class when setting the same item twice."""
 
+        # noinspection PyPackageRequirements
+        import deepdiff
+
         data = get_json_test_data()
         dd_dict = DeDuplicationDict()
+        dd_dict2 = DeDuplicationDict()
         to_visit = [(dd_dict, data)]
         while to_visit:
             dd_dict, data = to_visit.pop()
@@ -132,6 +140,29 @@ class TestMain(unittest.TestCase):
                     dd_dict[k] = v
                     dd_dict[k] = v
 
+        dd_dict2.update(dd_dict)
+        json_dd_dict = json.dumps(dd_dict.to_dict(), sort_keys=True)
+        json_dd_dict2 = json.dumps(dd_dict2.to_dict(), sort_keys=True)
+        json_data = json.dumps(data, sort_keys=True)
+        self.test_value_dict_consistency(dd_dict)
+        self.test_value_dict_consistency(dd_dict2)
+        self.assertEqual(json_dd_dict, json_data)
+        self.assertEqual(json_dd_dict2, json_data)
+        diff = deepdiff.DeepDiff(dd_dict, dd_dict2)
+        self.assertEqual(len(diff), 0)
+
+    def test_setitem_dd_value(self):
+        """Test the __setitem__ method of the DeDuplicationDict class when setting a DeDuplicationDict as value."""
+
+        data = get_json_test_data()
+        dd_dict = DeDuplicationDict()
+        for i in data:
+            if isinstance(data[i], dict):
+                dd_dict[i] = DeDuplicationDict(data[i])
+            else:
+                dd_dict[i] = data[i]
+
+        self.test_value_dict_consistency(dd_dict)
         json_dd_dict = json.dumps(dd_dict.to_dict(), sort_keys=True)
         json_data = json.dumps(data, sort_keys=True)
         self.assertEqual(json_dd_dict, json_data)
@@ -153,18 +184,29 @@ class TestMain(unittest.TestCase):
     def test_delitem(self):
         """Test the __delitem__ method of the DeDuplicationDict class."""
 
+        # noinspection PyPackageRequirements
+        import deepdiff
+
         data = get_json_test_data()
         dd_dict = DeDuplicationDict(**data)
         to_visit = [(dd_dict, data)]
         while to_visit:
             dd_dict, data = to_visit.pop()
             for k, v in list(data.items()):
+                dd_data2 = DeDuplicationDict(**data)
+                dd_data2["test"] = copy.deepcopy(dd_dict)
+                dd_dict2 = dd_data2["test"].detach()
+                self.assertEqual(dd_dict.parent, None)
+                self.assertEqual(len(deepdiff.DeepDiff(dd_dict, dd_dict2)), 0)
                 self.assertEqual(dd_dict.all_hashes_in_use(), set(dd_dict.value_dict.keys()))
+                self.assertEqual(dd_dict2.all_hashes_in_use(), set(dd_dict2.value_dict.keys()))
 
                 if isinstance(v, dict):
+                    t = dd_dict[k]
                     to_visit.append((dd_dict[k], v))
                     del dd_dict[k]
                     del data[k]
+                    self.assertEqual(t.parent, None)
                     self.assertNotIn(k, dd_dict)
                     self.assertNotIn(k, data)
                     json_dd_dict = json.dumps(dd_dict.to_dict(), sort_keys=True)
