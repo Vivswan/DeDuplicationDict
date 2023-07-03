@@ -108,7 +108,12 @@ class DeDuplicationDict(MutableMapping):
             del self[key]
 
         if isinstance(value, dict):
-            self.key_dict[key] = DeDuplicationDict(value, _value_dict=self.value_dict)
+            new_dd_dict = DeDuplicationDict(_value_dict=self.value_dict)
+            new_dd_dict.hash_length = self.hash_length
+            new_dd_dict.auto_clean_up = self.auto_clean_up
+            new_dd_dict.skip_update_on_setitem = self.skip_update_on_setitem
+            new_dd_dict.update(value)
+            self.key_dict[key] = new_dd_dict
         elif isinstance(value, DeDuplicationDict):
             self.key_dict[key] = value
             self.value_dict.update(value.value_dict)
