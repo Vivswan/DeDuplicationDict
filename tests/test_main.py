@@ -382,18 +382,18 @@ class TestMain(unittest.TestCase):
         """Test the multi_hash_length method of the DeDuplicationDict class."""
 
         data = get_json_test_data()
-        dd_dict = DeDuplicationDict({"a": 1, "b": 2, "c": 3})
+        dd_dict = DeDuplicationDict({'a': 1, 'b': 2, 'c': 3})
 
         for i in dd_dict.value_dict.keys():
             self.assertEqual(len(i), 8)
 
         dd_dict.hash_length = 32
-        dd_dict["data"] = data
+        dd_dict['data'] = data
         self.assertEqual(dd_dict.hash_length, 32)
-        self.assertEqual(dd_dict["data"].hash_length, 32)
-        del dd_dict["a"]
-        del dd_dict["b"]
-        del dd_dict["c"]
+        self.assertEqual(dd_dict['data'].hash_length, 32)
+        del dd_dict['a']
+        del dd_dict['b']
+        del dd_dict['c']
         for i in dd_dict.value_dict.keys():
             self.assertEqual(len(i), 32)
 
