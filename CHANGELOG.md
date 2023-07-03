@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.3
+
+* Moved all class variables to object variables
+
 ## 1.0.2
 
 * Added `__deepcopy__` and more tests
