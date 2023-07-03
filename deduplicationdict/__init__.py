@@ -51,11 +51,10 @@ class DeDuplicationDict(MutableMapping):
     Attributes:
         hash_length (int): The length of the hash value used for deduplication.
         auto_clean_up (bool): Whether to automatically clean up unused hash values when deleting items.
+        skip_update_on_setitem (bool): Whether to skip updating the value dictionary when setting an item.
+        key_dict (dict): A dictionary that maps hash values to their corresponding values.
+        value_dict (dict): A dictionary that maps values to their corresponding hash values.
     """
-
-    hash_length: int = 8
-    auto_clean_up: bool = True
-    skip_update_on_setitem: bool = True
 
     def __init__(self, *args, _value_dict: dict = None, **kwargs):
         """Initialize a DeDuplicationDict instance.
@@ -66,6 +65,9 @@ class DeDuplicationDict(MutableMapping):
             **kwargs: Keyword arguments passed to the dict constructor.
         """
 
+        self.hash_length: int = 8
+        self.auto_clean_up: bool = True
+        self.skip_update_on_setitem: bool = True
         self.key_dict: Dict[str, Union[str, DeDuplicationDict]] = {}
         self.value_dict: Dict[str, Any] = {} if _value_dict is None else _value_dict
 
