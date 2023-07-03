@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.4
+
+* Added support for multi hash length
+
 ## 1.0.3
 
 * Moved all class variables to object variables
