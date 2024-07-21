@@ -9,4 +9,3 @@ flake8-coding
 flake8-return
 # flake8-noreturn>=1.0.1; python_version >= '3.8'
 flake8-deprecated
-setuptools>=70.0.0 # not directly required, pinned by Snyk to avoid a vulnerability
