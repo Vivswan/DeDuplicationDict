@@ -28,7 +28,7 @@ if sys.version_info < (3, 7, 0):
     warnings.warn(
         'The installed Python version reached its end-of-life. '
         'Please upgrade to a newer Python version for receiving '
-        'further gdshelpers updates.', Warning)
+        'further DeDuplicationDict updates.', Warning)
 
 KT = TypeVar('KT')  # Key type.
 VT = TypeVar('VT')  # Value type.
